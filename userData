@@ -1,0 +1,25 @@
+#!/bin/bash
+sudo su
+yum update -y
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+amazon-linunx-extras disable php7.2
+amazon-linux-extras enable php8.0
+amazon-linux-extras install php8.0
+yum install -y php-mbstring
+yum install -y php-xml
+cd ~
+curl -sS https://getcomposer.org/installer | sudo php
+mv composer.phar /usr/local/bin/composer
+ln -s /usr/local/bin/composer /usr/bin/composer
+composer install
+cd /var/www/html
+composer create-project laravel/laravel laravel
+mv ./laravel/* /var/www/html/
+groupadd mygroup
+usermod -a -G mygroup apache
+usermod -a -G mygroup ec2-user
+chgrp -R mygroup /var/www/html
+chmod -R =775 /var/www/html
+systemctl restart httpd
